@@ -10,9 +10,21 @@ SELECT npi,
 FROM prescription
 GROUP BY npi
 ORDER BY total_claims DESC;
+
+-- OR vie subquery
+SELECT npi,
+	SUM(total_claim_count) AS total_claims
+FROM prescription
+GROUP BY npi
+HAVING SUM(total_claim_COUNT) =(SELECT SUM(total_claim_count) AS total_claims
+	FROM prescription
+	GROUP BY npi
+	ORDER BY total_claims DESC
+	LIMIT 1)
+
 -- 		A. npi: 1881634483	total: 99707
 
--- 2B. Repeat the above, but this time report the nppes_provider_first_name, nppes_provider_last_org_name,  specialty_description, and the total number of claims.
+-- 1.B. Repeat the above, but this time report the nppes_provider_first_name, nppes_provider_last_org_name,  specialty_description, and the total number of claims.
 SELECT prescription.npi,
 	prescriber.nppes_provider_first_name,
 	prescriber.nppes_provider_last_org_name,
@@ -27,4 +39,9 @@ GROUP BY prescription.npi, prescriber.nppes_provider_first_name,
 ORDER BY total_claims DESC;
 -- 		A. 1881634483	"BRUCE"	"PENDLEY"	"Family Practice"	99707
 
-SELECT 
+-- 2.A. Which specialty had the most total number of claims (totaled over all drugs)?
+SELECT COUNT(*),
+	specialty_description
+FROM prescriber
+GROUP BY specialty_description
+;
