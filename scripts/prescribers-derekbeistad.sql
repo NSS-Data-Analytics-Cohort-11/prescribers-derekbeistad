@@ -64,4 +64,37 @@ ORDER BY sum_opioid_claims DESC;
 -- 		A. "Nurse Practitioner"	900845
 		
 -- 3A. Which drug (generic_name) had the highest total drug cost?
+SELECT drug.generic_name, SUM(prescription.total_drug_cost) AS total_generic_cost
+FROM drug
+INNER JOIN prescription
+ON drug.drug_name = prescription.drug_name
+GROUP BY drug.generic_name
+ORDER BY total_generic_cost DESC;
+-- 		A. "INSULIN GLARGINE,HUM.REC.ANLOG"	104264066.35
 
+-- 3A.alt. Which drug (generic_name) had the highest total drug cost?
+SELECT drug.generic_name, AVG(prescription.total_drug_cost) AS total_generic_cost
+FROM drug
+INNER JOIN prescription
+ON drug.drug_name = prescription.drug_name
+GROUP BY drug.generic_name
+ORDER BY total_generic_cost DESC;
+-- 		A. "ASFOTASE ALFA"	1890733.045000000000
+
+-- 3B. Which drug (generic_name) has the highest total cost per day?
+SELECT drug.generic_name, ROUND(SUM(prescription.total_drug_cost / prescription.total_day_supply), 2) AS cost_per_day
+FROM drug
+INNER JOIN prescription
+ON drug.drug_name = prescription.drug_name
+GROUP BY drug.generic_name
+ORDER BY cost_per_day DESC;
+-- 		A. "LEDIPASVIR/SOFOSBUVIR"	88270.87
+
+-- 3B.alt. Which drug (generic_name) has the highest total cost per day?
+SELECT drug.generic_name, ROUND(AVG(prescription.total_drug_cost / prescription.total_day_supply), 2) AS cost_per_day
+FROM drug
+INNER JOIN prescription
+ON drug.drug_name = prescription.drug_name
+GROUP BY drug.generic_name
+ORDER BY cost_per_day DESC;
+-- 		A. "C1 ESTERASE INHIBITOR"	3418.84
