@@ -11,7 +11,7 @@ FROM prescription
 GROUP BY npi
 ORDER BY total_claims DESC;
 
--- OR vie subquery
+-- OR via subquery
 SELECT npi,
 	SUM(total_claim_count) AS total_claims
 FROM prescription
@@ -24,7 +24,7 @@ HAVING SUM(total_claim_COUNT) =(SELECT SUM(total_claim_count) AS total_claims
 
 -- 		A. npi: 1881634483	total: 99707
 
--- 1.B. Repeat the above, but this time report the nppes_provider_first_name, nppes_provider_last_org_name,  specialty_description, and the total number of claims.
+-- 1B. Repeat the above, but this time report the nppes_provider_first_name, nppes_provider_last_org_name,  specialty_description, and the total number of claims.
 SELECT prescription.npi,
 	prescriber.nppes_provider_first_name,
 	prescriber.nppes_provider_last_org_name,
@@ -39,9 +39,29 @@ GROUP BY prescription.npi, prescriber.nppes_provider_first_name,
 ORDER BY total_claims DESC;
 -- 		A. 1881634483	"BRUCE"	"PENDLEY"	"Family Practice"	99707
 
--- 2.A. Which specialty had the most total number of claims (totaled over all drugs)?
-SELECT COUNT(*),
-	specialty_description
+-- 2A. Which specialty had the most total number of claims (totaled over all drugs)?
+SELECT SUM(prescription.total_claim_count) AS total_claims,
+	prescriber.specialty_description
+FROM prescription
+INNER JOIN prescriber
+ON prescription.npi = prescriber.npi
+GROUP BY prescriber.specialty_description
+ORDER BY total_claims DESC;
+-- 		A. 9752347	"Family Practice"
+
+-- 2B. Which specialty had the most total number of claims for opioids?
+SELECT prescriber.specialty_description, SUM(opioid_npi.total_claims) AS sum_opioid_claims
 FROM prescriber
-GROUP BY specialty_description
-;
+INNER JOIN (SELECT npi, SUM(total_claim_count) AS total_claims
+		FROM prescription
+		WHERE drug_name IN (SELECT drug_name
+				FROM drug
+				WHERE opioid_drug_flag ILIKE 'y')
+		GROUP BY npi) as opioid_npi
+ON prescriber.npi = opioid_npi.npi
+GROUP BY prescriber.specialty_description
+ORDER BY sum_opioid_claims DESC;
+-- 		A. "Nurse Practitioner"	900845
+		
+-- 3A. Which drug (generic_name) had the highest total drug cost?
+
