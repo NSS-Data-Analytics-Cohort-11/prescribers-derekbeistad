@@ -120,3 +120,35 @@ GROUP BY drug_type
 ORDER BY total_cost_type DESC;
 -- 		A. "opioid"	105080626.37
 
+-- 5A. How many CBSAs are in Tennessee? **Warning:** The cbsa table contains information for all states, not just Tennessee.
+SELECT COUNT(cbsa)
+FROM cbsa
+WHERE fipscounty IN (SELECT fipscounty
+					FROM fips_county
+					WHERE state ILIKE 'tn');
+-- 		A. 42
+
+-- 5B. Which cbsa has the largest combined population? Which has the smallest? Report the CBSA name and total population.
+SELECT cbsa.cbsaname, SUM(population.population) AS combined_pop
+FROM cbsa
+INNER JOIN population
+ON cbsa.fipscounty = population.fipscounty
+GROUP BY cbsa.cbsaname
+ORDER BY combined_pop DESC;
+-- 		A. largest: "Nashville-Davidson--Murfreesboro--Franklin, TN"	1830410
+-- 		A. smallest: "Morristown, TN"	116352
+
+-- 5C. What is the largest (in terms of population) county which is not included in a CBSA? Report the county name and population.
+SELECT c.county, p.population 
+FROM population AS p
+INNER JOIN fips_county AS c
+ON p.fipscounty = c.fipscounty
+WHERE p.fipscounty NOT IN (SELECT DISTINCT fipscounty
+							FROM cbsa)
+ORDER BY population DESC;
+-- 		A. "SEVIER"	95523
+
+-- 6A. Find all rows in the prescription table where total_claims is at least 3000. Report the drug_name and the total_claim_count.
+
+
+
