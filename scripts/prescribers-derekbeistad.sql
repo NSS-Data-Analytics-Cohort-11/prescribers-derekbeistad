@@ -149,6 +149,39 @@ ORDER BY population DESC;
 -- 		A. "SEVIER"	95523
 
 -- 6A. Find all rows in the prescription table where total_claims is at least 3000. Report the drug_name and the total_claim_count.
+SELECT drug_name,
+	total_claim_count
+FROM prescription
+WHERE drug_name IN (SELECT drug_name
+					FROM prescription
+					GROUP BY drug_name
+					HAVING SUM(total_claim_count) >= 3000);
 
+-- 6B. For each instance that you found in part a, add a column that indicates whether the drug is an opioid.
+SELECT p.drug_name,
+	p.total_claim_count,
+	d.opioid_drug_flag
+FROM prescription AS p
+INNER JOIN drug AS d
+ON p.drug_name = d.drug_name
+WHERE p.drug_name IN (SELECT drug_name
+					FROM prescription
+					GROUP BY drug_name
+					HAVING SUM(total_claim_count) >= 3000);
+					
+-- 6C. Add another column to you answer from the previous part which gives the prescriber first and last name associated with each row.
+SELECT p.drug_name,
+	p.total_claim_count,
+	d.opioid_drug_flag,
+	CONCAT(pre.nppes_provider_first_name, ' ', pre.nppes_provider_last_org_name) AS prescriber_name
+FROM prescription AS p
+INNER JOIN drug AS d
+ON p.drug_name = d.drug_name
+INNER JOIN prescriber AS pre
+ON p.npi = pre.npi
+WHERE p.drug_name IN (SELECT drug_name
+					FROM prescription
+					GROUP BY drug_name
+					HAVING SUM(total_claim_count) >= 3000);
 
 
